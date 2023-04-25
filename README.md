@@ -4,7 +4,7 @@ This project is the backend of an issue-tracking application, developed with Nod
 
 ## Database Schema
 
-![Database Schema](https://imgur.com/Bbb4bYd.png)
+![Database Schema](https://imgur.com/gFlXp5D.png)
 
 ## Table of Contents
 
