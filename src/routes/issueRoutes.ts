@@ -14,8 +14,8 @@ router.get('/all/issue', getAllIssues);
 
 router.get('/issue/:id', getIssueById);
 
-router.put('/update/:id', updateIssue);
+router.put('/update/issue/:id', updateIssue);
 
-router.delete('/delete/:id', deleteIssue);
+router.delete('/delete/issue/:id', deleteIssue);
 
 export default router;

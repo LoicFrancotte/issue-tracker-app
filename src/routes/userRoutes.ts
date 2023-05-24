@@ -20,8 +20,8 @@ router.get('/all/user', getAllUsers);
 
 router.get('/user/:id', getUserById);
 
-router.put('/update/:id', updateUserById)
+router.put('/update/user/:id', updateUserById)
 
-router.delete('/delete/:id', deleteUserById); 
+router.delete('/delete/user/:id', deleteUserById); 
 
 export default router;
