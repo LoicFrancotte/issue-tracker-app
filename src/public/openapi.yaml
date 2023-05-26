@@ -453,6 +453,53 @@ paths:
                 properties:
                   message:
                     type: string
+  /labels/{id}:
+    get:
+      summary: Récupère un label par son ID
+      description: |
+        Récupère un label existant en utilisant son ID.
+      tags:
+        - Label
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: L'ID du label à récupérer.
+      responses:
+        '200':
+          description: Le label a été récupéré avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  name:
+                    type: string
+                  color:
+                    type: string
+        '404':
+          description: Label non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
   /all/labels:
     get:
       summary: Récupère tous les labels
@@ -801,6 +848,8 @@ paths:
       summary: Ajoute un commentaire à une issue spécifique par son ID
       description: |
         Ajoute un commentaire à une issue spécifique par son ID.
+      tags:
+        - IssueComment
       parameters:
         - in: path
           name: id
@@ -855,6 +904,8 @@ paths:
       summary: Récupère tous les commentaires de toutes les issues
       description: |
         Récupère tous les commentaires de toutes les issues.
+      tags:
+        - IssueComment
       responses:
         '200':
           description: Récupération réussie des commentaires.
@@ -889,6 +940,8 @@ paths:
       summary: Récupère un commentaire par ID
       description: |
         Récupère un commentaire spécifique par son ID.
+      tags:
+        - IssueComment
       parameters:
         - in: path
           name: id
@@ -937,6 +990,8 @@ paths:
       summary: Met à jour un commentaire par son ID
       description: |
         Met à jour un commentaire existant avec les détails fournis dans le corps de la requête.
+      tags:
+        - IssueComment
       parameters:
         - in: path
           name: id
@@ -1002,6 +1057,8 @@ paths:
       summary: Supprime un commentaire par son ID
       description: |
         Supprime un commentaire existant en utilisant son ID.
+      tags:
+        - IssueComment
       parameters:
         - in: path
           name: id

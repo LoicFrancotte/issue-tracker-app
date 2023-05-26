@@ -20,10 +20,28 @@ export const createLabel = async (req: Request, res: Response) => {
 export const getAllLabels = async (req: Request, res: Response) => {
   try {
     const labels = await Label.find();
+    
     res.status(200).json(labels);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'An error occurred while fetching labels.' });
+  }
+};
+
+// Get label by ID
+export const getLabelById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const label = await Label.findById(id);
+    if (!label) {
+      return res.status(404).json({ message: 'Label not found' });
+    }
+
+    res.status(200).json(label);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'An error occurred while fetching the label.' });
   }
 };
 
