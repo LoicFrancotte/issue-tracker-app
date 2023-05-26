@@ -8,10 +8,17 @@ This project is the backend of an issue-tracking application, developed with Nod
 
 ## Table of Contents
 
+- [Documentation](#documentation)
 - [Features](#features)
 - [Technologies](#technologies)
 - [Installation](#installation)
 - [Populating the Database with Fake Data](#populating-the-database-with-fake-data)
+
+## Documentation
+
+The Swagger documentation for this API is available at the following address: 
+
+[Swagger Documentation](https://issue-tracker-app-n4roq.ondigitalocean.app/swagger)
 
 ## Features
 

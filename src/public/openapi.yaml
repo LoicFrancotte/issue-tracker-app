@@ -1,0 +1,1039 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Issue Tracker API
+  description: API documentation for the Issue Tracker application.
+servers:
+  - url: https://issue-tracker-app-n4roq.ondigitalocean.app/
+components:
+  schemas:
+    Issue:
+      type: object
+      properties:
+        number:
+          type: integer
+        title:
+          type: string
+        status:
+          type: string
+        dueDate:
+          type: string
+          format: date
+        createdDate:
+          type: string
+          format: date
+        createdBy:
+          type: string
+        completedDate:
+          type: string
+          format: date
+        assignee:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        comments:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              comment:
+                type: string
+              createdBy:
+                type: string
+              createdDate:
+                type: string
+                format: date
+        commentCount:
+          type: integer
+paths:
+  /register:
+    post:
+      summary: Crée un nouvel utilisateur
+      description: |
+        Enregistre un nouvel utilisateur dans l'application. Nécessite un nom d'utilisateur, un email et un mot de passe. L'email et le nom d'utilisateur doivent être uniques.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+                - confirmPassword
+              properties:
+                username:
+                  type: string
+                  description: Nom d'utilisateur unique pour l'utilisateur.
+                email:
+                  type: string
+                  format: email
+                  description: Adresse email unique pour l'utilisateur.
+                password:
+                  type: string
+                  description: Mot de passe sécurisé pour l'utilisateur.
+                confirmPassword:
+                  type: string
+                  description: Confirmation du mot de passe pour vérification.
+      responses:
+        '201':
+          description: L'utilisateur a été créé avec succès. Retourne le token d'authentification.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+        '400':
+          description: Requête invalide. L'utilisateur existe déjà ou les mots de passe ne correspondent pas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /login:
+    post:
+      summary: Connecte un utilisateur existant
+      description: |
+        Connecte un utilisateur à l'application en utilisant le nom d'utilisateur et le mot de passe fournis.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: Nom d'utilisateur de l'utilisateur.
+                password:
+                  type: string
+                  description: Mot de passe de l'utilisateur.
+      responses:
+        '200':
+          description: L'utilisateur a été connecté avec succès.   Retourne le token d'authentification.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+        '400':
+          description: Requête invalide. Le mot de passe est   incorrect.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /username/{username}:
+    get:
+      summary: Obtient un utilisateur par son nom d'utilisateur
+      description: |
+        Récupère les informations d'un utilisateur spécifique en utilisant son nom d'utilisateur.
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: username
+          required: true
+          description: Nom d'utilisateur de l'utilisateur recherché.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: L'utilisateur a été trouvé avec succès. Retourne les informations de l'utilisateur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  profilePictureUrl:
+                    type: string
+                    nullable: true
+        '404':
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /all/user:
+    get:
+      summary: Obtient tous les utilisateurs
+      description: |
+        Récupère les informations de tous les utilisateurs.
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Tous les utilisateurs ont été trouvés avec succès. Retourne les informations des utilisateurs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                    email:
+                      type: string
+                    profilePictureUrl:
+                      type: string
+                      nullable: true
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /user/{id}:
+    get:
+      summary: Obtient un utilisateur par son ID
+      description: |
+        Récupère les informations d'un utilisateur en utilisant son ID.
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: L'ID de l'utilisateur.
+      responses:
+        '200':
+          description: Utilisateur trouvé avec succès. Retourne les informations de l'utilisateur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  profilePictureUrl:
+                    type: string
+                    nullable: true
+        '404':
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /update/user/{id}:
+    put:
+      summary: Met à jour un utilisateur par son ID
+      description: |
+        Met à jour les informations d'un utilisateur en utilisant son ID.
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: L'ID de l'utilisateur.
+      requestBody:
+        description: |
+          Les nouvelles informations de l'utilisateur.
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                confirmNewPassword:
+                  type: string
+      responses:
+        '200':
+          description: Utilisateur mis à jour avec succès. Retourne les informations de l'utilisateur mises à jour.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  profilePictureUrl:
+                    type: string
+                    nullable: true
+        '400':
+          description: Les mots de passe ne correspondent pas ou le mot de passe n'est pas conforme aux critères.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /delete/user/{id}:
+    delete:
+      summary: Supprime un utilisateur par son ID
+      description: |
+        Supprime un utilisateur à l'aide de son ID.
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: L'ID de l'utilisateur.
+      responses:
+        '200':
+          description: Utilisateur supprimé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /create/labels:
+    post:
+      summary: Créer un nouveau label
+      description: |
+        Créer un nouveau label avec un nom et une couleur spécifiques.
+      tags:
+        - Label
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+      responses:
+        '201':
+          description: Label créé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /all/labels:
+    get:
+      summary: Récupère tous les labels
+      description: |
+        Récupère tous les labels existants dans la base de données.
+      tags:
+        - Label
+      responses:
+        '200':
+          description: La liste de tous les labels.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                    name:
+                      type: string
+                    color:
+                      type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /update/labels/{id}:
+    put:
+      summary: Met à jour un label existant par son ID
+      description: |
+        Met à jour le nom et la couleur d'un label existant en utilisant son ID.
+      tags:
+        - Label
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID du label à mettre à jour
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+        required: true
+      responses:
+        '200':
+          description: Label mis à jour avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Label non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /delete/labels/{id}:
+    delete:
+      summary: Supprime un label par son ID
+      description: |
+        Supprime un label existant en utilisant son ID.
+      tags:
+        - Label
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID du label à supprimer
+      responses:
+        '200':
+          description: Label supprimé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Label non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /create/issue:
+    post:
+      summary: Crée une nouvelle issue
+      description: |
+        Crée une nouvelle issue avec les détails fournis dans le corps de la requête.
+      tags:
+        - Issue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Le titre de l'issue.
+                createdBy:
+                  type: string
+                  description: L'ID de l'utilisateur qui a créé   l'issue.
+                status:
+                  type: string
+                  description: L'état de l'issue. Peut être   'backlog', 'todo', 'inProgress', 'done', 'cancelled'. Par défaut à 'inProgress'.
+                dueDate:
+                  type: string
+                  format: date
+                  description: La date à laquelle l'issue doit   être terminée.
+                assignee:
+                  type: string
+                  description: L'ID de l'utilisateur assigné à l'issue.
+                labels:
+                  type: array
+                  items:
+                    type: string
+                  description: Les ID des labels associés à l'issue.
+      responses:
+        '201':
+          description: Issue créée avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  issue:
+                    $ref: '#/components/schemas/Issue'
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /all/issue:
+    get:
+      summary: Récupère toutes les issues
+      description: |
+        Récupère toutes les issues existantes dans la base de données.
+      tags:
+        - Issue
+      responses:
+        '200':
+          description: Récupération réussie de toutes les issues.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /issue/{id}:
+    get:
+      summary: Récupère une issue par son ID
+      description: |
+        Récupère une issue spécifique par son ID.
+      tags:
+        - Issue
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: L'ID de l'issue à récupérer.
+      responses:
+        '200':
+          description: Récupération réussie de l'issue.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /update/issue/{id}:
+    put:
+      summary: Met à jour une issue spécifique par son ID
+      description: |
+        Met à jour une issue spécifique avec les détails fournis dans le corps de la requête.
+      tags:
+        - Issue
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: L'ID de l'issue à mettre à jour.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Le titre de l'issue.
+                createdBy:
+                  type: string
+                  description: L'ID de l'utilisateur qui a créé l'issue.
+                status:
+                  type: string
+                  description: L'état de l'issue. Peut être 'backlog', 'todo', 'inProgress', 'done', 'cancelled'. Par défaut à 'inProgress'.
+                dueDate:
+                  type: string
+                  format: date
+                  description: La date à laquelle l'issue doit être terminée.
+                assignee:
+                  type: string
+                  description: L'ID de l'utilisateur assigné à   l'issue.
+                labels:
+                  type: array
+                  items:
+                    type: string
+                  description: Les ID des labels associés à l'issue.
+      responses:
+        '200':
+          description: Issue mise à jour avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  updatedIssue:
+                    $ref: '#/components/schemas/Issue'
+        '404':
+          description: Issue non trouvée.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /delete/issue/{id}:
+    delete:
+      summary: Supprime une issue spécifique par son ID
+      description: |
+        Supprime une issue spécifique par son ID.
+      tags:
+        - Issue
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: L'ID de l'issue à supprimer.
+      responses:
+        '200':
+          description: Issue supprimée avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /create/comments/{id}:
+    post:
+      summary: Ajoute un commentaire à une issue spécifique par son ID
+      description: |
+        Ajoute un commentaire à une issue spécifique par son ID.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: L'ID de l'issue à laquelle ajouter un commentaire.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  description: Le contenu du commentaire.
+                createdBy:
+                  type: string
+                  description: L'ID de l'utilisateur qui a créé le commentaire.
+      responses:
+        '200':
+          description: Commentaire ajouté avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  newComment:
+                    type: object
+                    properties:
+                      comment:
+                        type: string
+                      createdBy:
+                        type: string
+                      createdDate:
+                        type: string
+                        format: date-time
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /all/comments:
+    get:
+      summary: Récupère tous les commentaires de toutes les issues
+      description: |
+        Récupère tous les commentaires de toutes les issues.
+      responses:
+        '200':
+          description: Récupération réussie des commentaires.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        comment:
+                          type: string
+                        createdBy:
+                          type: string
+                        createdDate:
+                          type: string
+                          format: date-time
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /comments/{id}:
+    get:
+      summary: Récupère un commentaire par ID
+      description: |
+        Récupère un commentaire spécifique par son ID.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: L'ID du commentaire.
+      responses:
+        '200':
+          description: Récupération réussie du commentaire.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    type: object
+                    properties:
+                      comment:
+                        type: string
+                      createdBy:
+                        type: string
+                      createdDate:
+                        type: string
+                        format: date-time
+        '404':
+          description: Commentaire non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /update/comments/{id}:
+    put:
+      summary: Met à jour un commentaire par son ID
+      description: |
+        Met à jour un commentaire existant avec les détails fournis dans le corps de la requête.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: L'ID du commentaire.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  description: Le texte du commentaire.
+                createdBy:
+                  type: string
+                  description: L'ID de l'utilisateur qui a créé le commentaire.
+      responses:
+        '200':
+          description: Commentaire mis à jour avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  updatedComment:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      comment:
+                        type: string
+                      createdBy:
+                        type: string
+                      createdDate:
+                        type: string
+                        format: date-time
+        '404':
+          description: Commentaire non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /delete/comments/{id}:
+    delete:
+      summary: Supprime un commentaire par son ID
+      description: |
+        Supprime un commentaire existant en utilisant son ID.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: L'ID du commentaire à supprimer.
+      responses:
+        '200':
+          description: Commentaire supprimé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Commentaire non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erreur serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string

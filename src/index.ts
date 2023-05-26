@@ -3,6 +3,7 @@ dotenv.config();
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import path from 'path';
 
 import userRoutes from './routes/userRoutes';
 import labelRoutes from './routes/labelRoutes';
@@ -19,6 +20,16 @@ app.use('/', commentRoutes);
 app.use('/', issueRoutes);
 app.use('/', labelRoutes);
 app.use('/', userRoutes);
+
+app.get('/swagger', (req, res) => {
+  const swaggerHtmlPath = path.join(__dirname, 'public', 'swagger.html');
+  res.sendFile(swaggerHtmlPath);
+});
+
+app.get('/openapi.yaml', (req, res) => {
+  const openApiYamlPath = path.join(__dirname, 'public', 'openapi.yaml');
+  res.sendFile(openApiYamlPath);
+});
 
 const PORT: number = Number(process.env.PORT);
 
